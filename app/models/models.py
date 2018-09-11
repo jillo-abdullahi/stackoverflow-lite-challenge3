@@ -71,7 +71,7 @@ class User(object):
                 print "PostgresSQL connection closed"
 
 
-class Questions(object):
+class Question(object):
     """
     Class representing questions
     """
@@ -189,7 +189,7 @@ class Questions(object):
                 return "PostgresSQL connection closed"
 
 
-class Answers(object):
+class Answer(object):
     """
     Class representing answers
     """
