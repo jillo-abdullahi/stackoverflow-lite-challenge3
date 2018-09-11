@@ -21,7 +21,7 @@ class User(object):
         """
         try:
             cursor = conn.cursor()
-            query = """ INSERT INTO users (username, email, password, confirm_password) VALUES (%s, %s, %s, %s) """
+            query = "INSERT INTO users (username, email, password, confirm_password) VALUES (%s, %s, %s, %s);"
             cursor.execute(query, (self.username, self.email,
                                    self.password, self.confirm_password))
             conn.commit()
@@ -30,9 +30,9 @@ class User(object):
         except (Exception, psycopg2.DatabaseError) as error:
             if(conn):
                 conn.rollback()
-                return "Failed inserting record into user table {}".format(error)
+                return "Failed to insert record. {}".format(error)
         finally:
-                # Close database connection
+            # Close database connection
             if(conn):
                 cursor.close()
                 conn.close()
@@ -88,7 +88,7 @@ class Question(object):
         """
         try:
             cursor = conn.cursor()
-            query = """ INSERT INTO users (title, description, date_created, user_id) VALUES (%s, %s, %s, %s) """
+            query = "INSERT INTO users (title, description, date_created, user_id) VALUES (%s, %s, %s, %s);"
             cursor.execute(query, (self.title, self.description,
                                    self.date_created, self.user_id))
             conn.commit()
@@ -97,9 +97,9 @@ class Question(object):
         except (Exception, psycopg2.DatabaseError) as error:
             if(conn):
                 conn.rollback()
-                return "Failed inserting record into questions table {}".format(error)
+                return "Failed to insert record. {}".format(error)
         finally:
-                # Close database connection
+            # Close database connection
             if(conn):
                 cursor.close()
                 conn.close()
@@ -128,7 +128,7 @@ class Question(object):
             return results
 
         except (Exception, psycopg2.DatabaseError) as error:
-            return "Failed fetching record from questions table {}".format(error)
+            return "Failed to insert record. {}".format(error)
 
         finally:
             # Close database connection
@@ -157,7 +157,7 @@ class Question(object):
             return details
 
         except (Exception, psycopg2.DatabaseError) as error:
-            return "Failed fetching record from questions table {}".format(error)
+            return "Failed to insert record. {}".format(error)
 
         finally:
             # Close database connection
@@ -182,7 +182,7 @@ class Question(object):
                 conn.rollback()
                 return "Failed to delete question {}".format(error)
         finally:
-                # Close database connection
+            # Close database connection
             if(conn):
                 cursor.close()
                 conn.close()
@@ -194,11 +194,12 @@ class Answer(object):
     Class representing answers
     """
 
-    def __init__(self, description, date_created, user_id, question_id, preferred=False):
-        self.description = description
+    def __init__(self, desc, date_created, user_id, qn_id, preferred=False):
+        self.desc = desc
         self.user_id = user_id
         self.date_created = date_created
         self.preferred = preferred
+        self.qn_id = qn_id
 
     def post_answer(self):
         """
@@ -206,9 +207,9 @@ class Answer(object):
         """
         try:
             cursor = conn.cursor()
-            query = """ INSERT INTO answers (description, date_created, user_id, question_id, preferred) VALUES (%s, %s, %s, %s, %s) """
-            cursor.execute(query, (self.description, self.date_created,
-                                   self.user_id, self.date_created, self.preferred))
+            query = "INSERT INTO answers (description, date_created, user_id, question_id, preferred) VALUES (%s, %s, %s, %s, %s);"
+            cursor.execute(query, (self.desc, self.date_created,
+                                   self.user_id, self.qn_id, self.preferred))
             conn.commit()
             return "Answer successcully added to database"
 
@@ -217,7 +218,7 @@ class Answer(object):
                 conn.rollback()
                 return "Failed posting answer {}".format(error)
         finally:
-                # Close database connection
+            # Close database connection
             if(conn):
                 cursor.close()
                 conn.close()
@@ -235,7 +236,27 @@ class Answer(object):
 
             return "Answer successcully updated"
 
-            return details
+        except (Exception, psycopg2.DatabaseError) as error:
+            return "Failed to update answer {}".format(error)
+
+        finally:
+            # Close database connection
+            if(conn):
+                cursor.close()
+                conn.close()
+                return "PostgresSQL connection closed"
+
+    def update_answer(self, description, ans_id):
+        """
+        Instance method to update details of an answer
+        """
+        try:
+            cursor = conn.cursor()
+            query = """ UPDATE answers SET description=%s WHERE (id=%s) """
+            cursor.execute(query, [description, ans_id])
+            conn.commit()
+
+            return "Answer successcully updated"
 
         except (Exception, psycopg2.DatabaseError) as error:
             return "Failed to update answer {}".format(error)
