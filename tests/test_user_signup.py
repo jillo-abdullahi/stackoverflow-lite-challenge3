@@ -46,7 +46,5 @@ class TestUserCanSignup(unittest.TestCase):
         """
 
         cursor = conn.cursor()
-        query = """ DELETE * FROM users """
+        query = """ DELETE FROM users """
         cursor.execute(query)
-        cursor.close()
-        conn.close()
