@@ -3,7 +3,7 @@
 import unittest
 import json
 
-from app import create_app
+from app.views.views import app
 from instance.config import conn
 
 
@@ -16,8 +16,7 @@ class TestAnswers(unittest.TestCase):
         """
        set up method to start test_client and initialize variables
         """
-        self.app = create_app("testing")
-        self.app = self.app.test_client()
+        self.app = app.test_client()
 
         self.question_details = {
             "title": "How to exit Vim on Ubuntu 16.04",
