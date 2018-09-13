@@ -99,14 +99,15 @@ class Question(object):
         cursor.execute(query, [qn_id])
         question = cursor.fetchone()
 
-        details = {}
-        details["question_id"] = question[0]
-        details["title"] = question[1]
-        details["description"] = question[2]
-        details["date_created"] = question[3]
-        details["user_id"] = question[4]
+        if question:
+            details = {}
+            details["question_id"] = question[0]
+            details["title"] = question[1]
+            details["description"] = question[2]
+            details["date_created"] = question[3]
+            details["user_id"] = question[4]
 
-        return details
+            return details
 
     @staticmethod
     def delete_question(cursor, qn_id):

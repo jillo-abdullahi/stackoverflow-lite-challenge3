@@ -22,7 +22,13 @@ cursor = conn.cursor()
 now = datetime.datetime.now()
 
 
-class QuestionsPostGet(Resource):
+class UserSignup(Resource):
+    """
+    Class for user signup
+    """
+
+
+class QuestionsView(Resource):
     """Resource class for posting and getting all questions """
 
     def post(self):
@@ -73,14 +79,62 @@ class QuestionsPostGet(Resource):
         """
         Get all questions
         """
-        questions = Question.get_all_questions(cursor)
-        if not questions:
-            response = jsonify({"message": "No questions yet"})
-            response.status_code = 404
+        try:
+            questions = Question.get_all_questions(cursor)
+            if not questions:
+                response = jsonify({"message": "No questions yet"})
+                response.status_code = 404
+                return response
+            response = jsonify({"questions": questions})
+            response.status_code = 200
             return response
-        response = jsonify({"Questions": questions})
-        response.status_code = 200
-        return response
+        except (Exception, psycopg2.DatabaseError) as error:
+            if(conn):
+                return "failed to fetch questions. {}".format(error)
 
 
-api.add_resource(QuestionsPostGet, '/stackoverflowlite/api/v1/questions')
+class QuestionView(Resource):
+    """
+    Class to get one question as well as delete
+    """
+
+    def get(self, qn_id):
+        """
+        get a specific question"""
+        try:
+            question = Question.get_one_question(cursor, qn_id)
+            if not question:
+                response = jsonify({"error": "question doesn't exist"})
+                response.status_code = 404
+                return response
+            response = jsonify({"question": question})
+            response.status_code = 200
+            return response
+
+        except (Exception, psycopg2.DatabaseError) as error:
+            if(conn):
+                return "Failed to fetch question. {}".format(error)
+
+    def delete(self, qn_id):
+        """
+        Delete a question
+        """
+        try:
+            question = Question.get_one_question(cursor, qn_id)
+            if not question:
+                response = jsonify({"error": "question doesn't exist"})
+                response.status_code = 404
+                return response
+            Question.delete_question(cursor, qn_id)
+            response = jsonify({"message": "question deleted successfully"})
+            response.status_code = 200
+            return response
+
+        except (Exception, psycopg2.DatabaseError) as error:
+            if(conn):
+                return "Failed to delete question. {}".format(error)
+
+
+api.add_resource(QuestionsView, '/stackoverflowlite/api/v1/questions')
+api.add_resource(QuestionView,
+                 '/stackoverflowlite/api/v1/questions/<int:qn_id>')
