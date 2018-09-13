@@ -30,9 +30,9 @@ class User(object):
         Instance method to get all users
         """
 
-        query = """ SELECT * FROM users """
+        query = "SELECT * FROM users;"
         cursor.execute(query)
-        all_users = cursor.fetch_all()
+        all_users = cursor.fetchall()
 
         results = []
         for user in all_users:
