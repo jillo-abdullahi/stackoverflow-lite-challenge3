@@ -1,12 +1,6 @@
-"""File for app entry point"""
+"""Module for app entry point"""
 
-import os
-
-from app import create_app
-
-config_name = os.getenv('APP_SETTINGS')
-app = create_app(config_name)
-
+from app.views.views import app
 
 if __name__ == '__main__':
     app.run()

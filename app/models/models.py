@@ -1,5 +1,4 @@
 """module for all models of the application"""
-import psycopg2
 
 from instance.config import conn
 
@@ -15,60 +14,37 @@ class User(object):
         self.password = password
         self.confirm_password = confirm_password
 
-    def register_user(self):
+    def register_user(self, cursor):
         """
         Instance method to create new user
         """
-        try:
-            cursor = conn.cursor()
-            query = "INSERT INTO users (username, email, password, confirm_password) VALUES (%s, %s, %s, %s);"
-            cursor.execute(query, (self.username, self.email,
-                                   self.password, self.confirm_password))
-            conn.commit()
-            return "User successcully added to database"
 
-        except (Exception, psycopg2.DatabaseError) as error:
-            if(conn):
-                conn.rollback()
-                return "Failed to insert record. {}".format(error)
-        finally:
-            # Close database connection
-            if(conn):
-                cursor.close()
-                conn.close()
-                return "PostgresSQL connection closed"
+        query = "INSERT INTO users (username, email, password, confirm_password) VALUES (%s, %s, %s, %s);"
+        cursor.execute(query, (self.username, self.email,
+                               self.password, self.confirm_password))
+        conn.commit()
 
-    def get_users(self):
+    @staticmethod
+    def get_users(cursor):
         """
         Instance method to get all users
         """
-        try:
-            cursor = conn.cursor()
-            query = """ SELECT * FROM users """
-            cursor.execute(query)
-            all_users = cursor.fetch_all()
 
-            results = []
-            for user in all_users:
-                details = {}
-                details["user_id"] = user[0]
-                details["username"] = user[1]
-                details["email"] = user[2]
-                details["password"] = user[3]
-                details["confirm_password"] = user[4]
-                results.append(details)
+        query = """ SELECT * FROM users """
+        cursor.execute(query)
+        all_users = cursor.fetch_all()
 
-            return results
+        results = []
+        for user in all_users:
+            details = {}
+            details["user_id"] = user[0]
+            details["username"] = user[1]
+            details["email"] = user[2]
+            details["password"] = user[3]
+            details["confirm_password"] = user[4]
+            results.append(details)
 
-        except (Exception, psycopg2.DatabaseError) as error:
-            return "Failed fetching record from users table {}".format(error)
-
-        finally:
-            # Close database connection
-            if(conn):
-                cursor.close()
-                conn.close()
-                print "PostgresSQL connection closed"
+        return results
 
 
 class Question(object):
@@ -82,111 +58,65 @@ class Question(object):
         self.user_id = user_id
         self.date_created = date_created
 
-    def post_question(self):
+    def post_question(self, cursor):
         """
-        Instance method to create new user
+        Instance method to post new question
         """
-        try:
-            cursor = conn.cursor()
-            query = "INSERT INTO users (title, description, date_created, user_id) VALUES (%s, %s, %s, %s);"
-            cursor.execute(query, (self.title, self.description,
-                                   self.date_created, self.user_id))
-            conn.commit()
-            return "Question successcully added to database"
 
-        except (Exception, psycopg2.DatabaseError) as error:
-            if(conn):
-                conn.rollback()
-                return "Failed to insert record. {}".format(error)
-        finally:
-            # Close database connection
-            if(conn):
-                cursor.close()
-                conn.close()
-                return "PostgresSQL connection closed"
+        query = "INSERT INTO questions (title, description, date_created, user_id) VALUES (%s, %s, %s, %s);"
+        cursor.execute(query, (self.title, self.description,
+                               self.user_id, self.date_created))
+        conn.commit()
 
-    def get_all_questions(self):
+    @staticmethod
+    def get_all_questions(cursor):
         """
         Instance method to get all questions
         """
-        try:
-            cursor = conn.cursor()
-            query = """ SELECT * FROM questions """
-            cursor.execute(query)
-            all_questions = cursor.fetch_all()
+        query = "SELECT * FROM questions;"
+        cursor.execute(query)
+        all_questions = cursor.fetchall()
 
-            results = []
-            for question in all_questions:
-                details = {}
-                details["question_id"] = question[0]
-                details["title"] = question[1]
-                details["description"] = question[2]
-                details["date_created"] = question[3]
-                details["user_id"] = question[4]
-                results.append(details)
-
-            return results
-
-        except (Exception, psycopg2.DatabaseError) as error:
-            return "Failed to insert record. {}".format(error)
-
-        finally:
-            # Close database connection
-            if(conn):
-                cursor.close()
-                conn.close()
-                return "PostgresSQL connection closed"
-
-    def get_one_question(self, qn_id):
-        """
-        Instance method to fetch a specific question
-        """
-        try:
-            cursor = conn.cursor()
-            query = """ SELECT * FROM questions WHERE id=%s; """
-            cursor.execute(query, [qn_id])
-            question = cursor.fetch_one()
-
+        results = []
+        for question in all_questions:
             details = {}
             details["question_id"] = question[0]
             details["title"] = question[1]
             details["description"] = question[2]
             details["date_created"] = question[3]
             details["user_id"] = question[4]
+            results.append(details)
 
-            return details
+        return results
 
-        except (Exception, psycopg2.DatabaseError) as error:
-            return "Failed to insert record. {}".format(error)
+    @staticmethod
+    def get_one_question(cursor, qn_id):
+        """
+        Instance method to fetch a specific question
+        """
 
-        finally:
-            # Close database connection
-            if(conn):
-                cursor.close()
-                conn.close()
-                return "PostgresSQL connection closed"
+        query = "SELECT * FROM questions WHERE id=%s;"
+        cursor.execute(query, [qn_id])
+        question = cursor.fetchone()
 
-    def delete_question(self, qn_id):
+        details = {}
+        details["question_id"] = question[0]
+        details["title"] = question[1]
+        details["description"] = question[2]
+        details["date_created"] = question[3]
+        details["user_id"] = question[4]
+
+        return details
+
+    @staticmethod
+    def delete_question(cursor, qn_id):
         """
         Instance method to delete a question
         """
-        try:
-            cursor = conn.cursor()
-            query = """ DELETE FROM questions WHERE id=%s """
-            cursor.execute(query, [qn_id])
-            conn.commit()
-            return "Question successcully deleted from database"
 
-        except (Exception, psycopg2.DatabaseError) as error:
-            if(conn):
-                conn.rollback()
-                return "Failed to delete question {}".format(error)
-        finally:
-            # Close database connection
-            if(conn):
-                cursor.close()
-                conn.close()
-                return "PostgresSQL connection closed"
+        query = "DELETE FROM questions WHERE id=%s;"
+        cursor.execute(query, [qn_id])
+        conn.commit()
 
 
 class Answer(object):
@@ -201,69 +131,31 @@ class Answer(object):
         self.preferred = preferred
         self.qn_id = qn_id
 
-    def post_answer(self):
+    def post_answer(self, cursor):
         """
         Instance method to post answer
         """
-        try:
-            cursor = conn.cursor()
-            query = "INSERT INTO answers (description, date_created, user_id, question_id, preferred) VALUES (%s, %s, %s, %s, %s);"
-            cursor.execute(query, (self.desc, self.date_created,
-                                   self.user_id, self.qn_id, self.preferred))
-            conn.commit()
-            return "Answer successcully added to database"
 
-        except (Exception, psycopg2.DatabaseError) as error:
-            if(conn):
-                conn.rollback()
-                return "Failed posting answer {}".format(error)
-        finally:
-            # Close database connection
-            if(conn):
-                cursor.close()
-                conn.close()
-                return "PostgresSQL connection closed"
+        query = "INSERT INTO answers (description, date_created, user_id, question_id, preferred) VALUES (%s, %s, %s, %s, %s);"
+        cursor.execute(query, (self.desc, self.date_created,
+                               self.user_id, self.qn_id, self.preferred))
+        conn.commit()
 
-    def accept_answer(self, ans_id):
+    @staticmethod
+    def accept_answer(cursor, ans_id):
         """
         Instance method to select answer as preferred
         """
-        try:
-            cursor = conn.cursor()
-            query = """ UPDATE answers SET preferred=%s WHERE (id=%s) """
-            cursor.execute(query, [True, ans_id])
-            conn.commit()
 
-            return "Answer successcully updated"
+        query = "UPDATE answers SET preferred=%s WHERE (id=%s);"
+        cursor.execute(query, [True, ans_id])
+        conn.commit()
 
-        except (Exception, psycopg2.DatabaseError) as error:
-            return "Failed to update answer {}".format(error)
-
-        finally:
-            # Close database connection
-            if(conn):
-                cursor.close()
-                conn.close()
-                return "PostgresSQL connection closed"
-
-    def update_answer(self, description, ans_id):
+    def update_answer(self, cursor, description, ans_id):
         """
         Instance method to update details of an answer
         """
-        try:
-            cursor = conn.cursor()
-            query = """ UPDATE answers SET description=%s WHERE (id=%s) """
-            cursor.execute(query, [description, ans_id])
-            conn.commit()
 
-            return "Answer successcully updated"
-
-        except (Exception, psycopg2.DatabaseError) as error:
-            return "Failed to update answer {}".format(error)
-
-        finally:
-            # Close database connection
-            if(conn):
-                cursor.close()
-                conn.close()
-                return "PostgresSQL connection closed"
+        query = "UPDATE answers SET description=%s WHERE (id=%s);"
+        cursor.execute(query, [description, ans_id])
+        conn.commit()
