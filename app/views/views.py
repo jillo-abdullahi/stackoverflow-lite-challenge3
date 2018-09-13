@@ -4,11 +4,13 @@ import datetime
 import psycopg2
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 from instance.config import app_config
-from app.models.models import Question, Answer
-from app.utilities import validate_question, validate_answer
+from app.models.models import Question, Answer, User
+from app.utilities import validate_question, validate_answer, validate_signup
+from app.utilities import validate_username, validate_email, validate_password
 from instance.config import conn
 
 config_name = os.getenv('APP_SETTINGS')
@@ -26,6 +28,87 @@ class UserSignup(Resource):
     """
     Class for user signup
     """
+
+    def post(self):
+        """
+        Add new user
+        """
+        user_details = request.get_json()
+
+        # Check if all required fields have been provided
+        if validate_signup(user_details):
+            return validate_signup(user_details)
+
+        # Check if username is valid
+        if not validate_username(user_details):
+            msg1 = "username should have "
+            msg2 = "between 5 and 20 characters and "
+            msg3 = "must contain letters or numbers only"
+            response = jsonify({"error": msg1 + msg2 + msg3})
+            response.status_code = 400
+            return response
+
+        # Check if email is valid
+        if not validate_email(user_details):
+            msg = "invalid email"
+            response = jsonify({"error": msg})
+            response.status_code = 400
+            return response
+
+        # Check password length
+        if not validate_password(user_details):
+            msg = "password must have at least 6 characters"
+            response = jsonify({"error": msg})
+            response.status_code = 400
+            return response
+
+        # Check if passwords provided match
+        password = generate_password_hash(user_details["password"])
+        confirm_password = user_details["confirm-password"]
+        if not check_password_hash(password, confirm_password):
+            msg = "passwords provided do not match"
+            response = jsonify({"error": msg})
+            response.status_code = 400
+            return response
+
+        # Check if username or email have been taken
+        try:
+            users = User.get_users(cursor)
+            if users:
+                for user in users:
+                    if user["username"] == user_details["username"]:
+                        message = "username has already been taken"
+                        response = jsonify({"error": message})
+                        response.status_code = 400
+                        return response
+
+                    if user["email"] == user_details["email"]:
+                        message = "email has already been registered"
+                        response = jsonify({"error": message})
+                        response.status_code = 400
+                        return response
+
+        except (Exception, psycopg2.DatabaseError) as error:
+            if(conn):
+                return "Failed to get users. {}".format(error)
+
+        # All validations passed. Add user
+        username = user_details["username"]
+        email = user_details["email"]
+        confirm_password = generate_password_hash(
+            user_details["confirm-password"])
+
+        try:
+            user = User(username, email, password, confirm_password)
+            user.register_user(cursor)
+            message = "User registered successfully"
+            response = jsonify({"message": message})
+            response.status_code = 201
+            return response
+
+        except (Exception, psycopg2.DatabaseError) as error:
+            if(conn):
+                return "Failed to add user. {}".format(error)
 
 
 class QuestionsView(Resource):
@@ -53,7 +136,6 @@ class QuestionsView(Resource):
                         return response
         except (Exception, psycopg2.DatabaseError) as error:
             if(conn):
-                conn.rollback()
                 return "Failed to get questions. {}".format(error)
         # Validation checks passed.
 
@@ -181,4 +263,4 @@ api.add_resource(QuestionView,
 api.add_resource(
     AnswersView, '/stackoverflowlite/api/v1/questions/<int:qn_id>/answers')
 api.add_resource(
-    AnswerView, '/stackoverflowlite/api/v1/questions/<int:qn_id>/answers')
+    UserSignup, '/stackoverflowlite/api/v1/auth/signup')

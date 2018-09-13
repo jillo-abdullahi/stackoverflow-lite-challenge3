@@ -1,4 +1,5 @@
 """Utility functions to perform validations"""
+import re
 from flask import jsonify
 
 
@@ -20,6 +21,27 @@ def validate_signup(args):
     # Check fields provided
     if check_keys(args, params, length):
         return check_keys(args, params, length)
+
+
+def validate_email(args):
+    """Function to validate username"""
+    if re.match(r'^[a-zA-Z0-9_\-\.]{3,}@.*\.[a-z]{2,4}$', args["email"]):
+        return True
+    return False
+
+
+def validate_username(args):
+    """Function to validate username"""
+    if re.match(r'^[a-zA-Z0-9]{5,20}$', args["username"]):
+        return True
+    return False
+
+
+def validate_password(args):
+    """Function to check password length"""
+    if re.match(r'^[\w\W]{6,}$', args["password"]):
+        return True
+    return False
 
 
 def validate_question(args):
