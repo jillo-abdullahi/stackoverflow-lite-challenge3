@@ -22,8 +22,8 @@ cursor = conn.cursor()
 now = datetime.datetime.now()
 
 
-class Questions(Resource):
-    """Resource class for questions """
+class QuestionsPostGet(Resource):
+    """Resource class for posting and getting all questions """
 
     def post(self):
         """
@@ -69,5 +69,18 @@ class Questions(Resource):
         response.status_code = 201
         return response
 
+    def get(self):
+        """
+        Get all questions
+        """
+        questions = Question.get_all_questions(cursor)
+        if not questions:
+            response = jsonify({"message": "No questions yet"})
+            response.status_code = 404
+            return response
+        response = jsonify({"Questions": questions})
+        response.status_code = 200
+        return response
 
-api.add_resource(Questions, '/stackoverflowlite/api/v1/questions')
+
+api.add_resource(QuestionsPostGet, '/stackoverflowlite/api/v1/questions')
