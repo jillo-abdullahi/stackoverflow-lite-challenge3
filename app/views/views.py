@@ -7,8 +7,8 @@ from flask_restful import Resource, Api
 
 
 from instance.config import app_config
-from app.models.models import Question
-from app.utilities import validate_question
+from app.models.models import Question, Answer
+from app.utilities import validate_question, validate_answer
 from instance.config import conn
 
 config_name = os.getenv('APP_SETTINGS')
@@ -66,14 +66,14 @@ class QuestionsView(Resource):
             question = Question(title, description, date_created, user_id)
             question.post_question(cursor)
 
+            response = jsonify({"message": "Question successfully posted"})
+            response.status_code = 201
+            return response
+
         except (Exception, psycopg2.DatabaseError) as error:
             if(conn):
                 conn.rollback()
                 return "Failed to insert record. {}".format(error)
-
-        response = jsonify({"message": "Question successfully posted"})
-        response.status_code = 201
-        return response
 
     def get(self):
         """
@@ -135,6 +135,50 @@ class QuestionView(Resource):
                 return "Failed to delete question. {}".format(error)
 
 
+class AnswersView(Resource):
+    """
+    Class for posting of answers
+    """
+
+    def post(self, qn_id):
+        """
+        post a question
+        """
+        answer_details = request.get_json()
+
+        # Validate answer fields before posting
+
+        if validate_answer(answer_details):
+            return validate_answer(answer_details)
+
+        # post answer
+        description = answer_details["description"]
+        date_created = (now.strftime("%d-%m-%Y %H:%M:%S"))
+        user_id = 1
+
+        try:
+            question = Question.get_one_question(cursor, qn_id)
+            if not question:
+                response = jsonify({"error": "question doesn't exist"})
+                response.status_code = 404
+                return response
+
+            answer = Answer(description, date_created, user_id, qn_id)
+            answer.post_answer(cursor)
+
+            response = jsonify({"message": "Answer successfully posted"})
+            response.status_code = 201
+            return response
+
+        except (Exception, psycopg2.DatabaseError) as error:
+            if(conn):
+                return "Failed to post answer. {}".format(error)
+
+
 api.add_resource(QuestionsView, '/stackoverflowlite/api/v1/questions')
 api.add_resource(QuestionView,
                  '/stackoverflowlite/api/v1/questions/<int:qn_id>')
+api.add_resource(
+    AnswersView, '/stackoverflowlite/api/v1/questions/<int:qn_id>/answers')
+api.add_resource(
+    AnswerView, '/stackoverflowlite/api/v1/questions/<int:qn_id>/answers')
