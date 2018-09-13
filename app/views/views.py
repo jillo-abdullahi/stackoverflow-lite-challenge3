@@ -146,7 +146,7 @@ class AnswersView(Resource):
         """
         answer_details = request.get_json()
 
-        # Validate answer field
+        # Validate answer fields before posting
 
         if validate_answer(answer_details):
             return validate_answer(answer_details)

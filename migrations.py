@@ -53,7 +53,7 @@ def migration():
         print("Error while creating PostgreSQL tables", error)
 
     finally:
-        # closing database connection.
+        # close database connection.
         if(conn):
             cursor.close()
             conn.close()
