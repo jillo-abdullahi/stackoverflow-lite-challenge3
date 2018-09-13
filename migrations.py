@@ -35,7 +35,7 @@ def migration():
         # create answers table
         answers = """CREATE TABLE answers (
             id SERIAL PRIMARY KEY,
-            answer_text TEXT,
+            description TEXT,
             date_created VARCHAR(50),
             question_id INT references questions(id),
             user_id INT references users(id),
@@ -50,7 +50,7 @@ def migration():
         print("Tables successfully created")
 
     except (Exception, psycopg2.DatabaseError) as error:
-        print("Error while creating PostgreSQL table", error)
+        print("Error while creating PostgreSQL tables", error)
 
     finally:
         # closing database connection.
