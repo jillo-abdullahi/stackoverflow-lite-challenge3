@@ -95,9 +95,21 @@ class Question(object):
         Instance method to fetch a specific question
         """
 
-        query = "SELECT * FROM questions WHERE id=%s;"
-        cursor.execute(query, [qn_id])
+        qn_query = "SELECT * FROM questions WHERE id=%s;"
+        cursor.execute(qn_query, [qn_id])
         question = cursor.fetchone()
+
+        ans_query = "SELECT * FROM answers WHERE question_id=%s"
+        cursor.execute(ans_query, [qn_id])
+        answers = cursor.fetchall()
+
+        ans_result = []
+        if answers:
+            for answer in answers:
+                details = {}
+                details["date_created"] = answer[2]
+                details["title"] = answer[1]
+                ans_result.append(details)
 
         if question:
             details = {}
@@ -106,6 +118,7 @@ class Question(object):
             details["description"] = question[2]
             details["date_created"] = question[3]
             details["user_id"] = question[4]
+            details["Answers"] = ans_result
 
             return details
 
