@@ -1,6 +1,7 @@
 """module for all models of the application"""
 
 from instance.config import conn
+from app.validations import fetch_one
 
 
 class User(object):
@@ -54,8 +55,7 @@ class User(object):
         method to check if user can login
         """
         query = "SELECT * FROM users WHERE (email=%s);"
-        cursor.execute(query, [email])
-        user = cursor.fetchone()
+        user = fetch_one(query, email)
 
         result = {
             "user_id": user[0],
@@ -119,12 +119,10 @@ class Question(object):
         """
 
         qn_query = "SELECT * FROM questions WHERE id=%s;"
-        cursor.execute(qn_query, [qn_id])
-        question = cursor.fetchone()
+        question = fetch_one(qn_query, qn_id)
 
         ans_query = "SELECT * FROM answers WHERE question_id=%s"
-        cursor.execute(ans_query, [qn_id])
-        answers = cursor.fetchall()
+        answers = fetch_one(ans_query, qn_id)
 
         ans_result = []
         if answers:
@@ -168,9 +166,7 @@ class Question(object):
         Method to get user id based on question
         """
         query = "SELECT user_id FROM questions WHERE id=%s"
-        cursor.execute(query, [qn_id])
-        result = cursor.fetchone()
-        conn.commit()
+        result = cursor.fetch_one(query, qn_id)
 
         return result
 
@@ -224,7 +220,7 @@ class Answer(object):
         """
         ans_query = "SELECT * FROM answers WHERE question_id=%s;"
         cursor.execute(ans_query, [qn_id])
-        result = cursor.fetchone()
+        result = cursor.fetch_one(ans_query, qn_id)
 
         return result
 
@@ -237,7 +233,7 @@ class Answer(object):
         cursor.execute(ans_query, [qn_id])
 
     @staticmethod
-    def get_user_by_answer_id(cursor, ans_id):
+    def get_user_by_answer_id(cursor, user_id):
         """
         Get a specific answer using answer id
         """
@@ -265,7 +261,6 @@ class Answer(object):
         Method to get answer author
         """
         query = "SELECT user_id FROM answers WHERE id=%s"
-        cursor.execute(query, [ans_id])
-        result = cursor.fetchone()
+        result = fetch_one(query, ans_id)
 
         return result

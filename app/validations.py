@@ -1,6 +1,9 @@
 """Utility functions to perform validations"""
 import re
 from flask import jsonify
+from instance.config import conn
+
+cursor = conn.cursor()
 
 
 def validate_signup(args):
@@ -81,3 +84,12 @@ def check_keys(args, params, length):
             {"error": "Fields required: {}".format(", ".join(params))})
         response.status_code = 400
         return response
+
+
+def fetch_one(query, item):
+    """
+    Method to fetch a specific value from db table based on
+    query provided"""
+    cursor.execute(query, [item])
+    element = cursor.fetchone()
+    return element
