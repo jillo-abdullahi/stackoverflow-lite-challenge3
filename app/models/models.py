@@ -166,7 +166,7 @@ class Question(object):
         Method to get user id based on question
         """
         query = "SELECT user_id FROM questions WHERE id=%s"
-        result = cursor.fetch_one(query, qn_id)
+        result = fetch_one(query, qn_id)
 
         return result
 
@@ -219,8 +219,7 @@ class Answer(object):
         method to get a specific answer using question id
         """
         ans_query = "SELECT * FROM answers WHERE question_id=%s;"
-        cursor.execute(ans_query, [qn_id])
-        result = cursor.fetch_one(ans_query, qn_id)
+        result = fetch_one(ans_query, qn_id)
 
         return result
 
