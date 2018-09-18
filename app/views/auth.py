@@ -7,8 +7,8 @@ from flask_jwt_extended import create_access_token
 
 from . import cursor
 from app.models.models import User
-from app.validations import validate_signup
-from app.validations import check_keys
+from app.utils import validate_signup
+from app.utils import check_keys
 from instance.config import conn
 
 

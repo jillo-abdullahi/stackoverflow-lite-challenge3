@@ -1,7 +1,7 @@
 """module for all models of the application"""
 
 from instance.config import conn
-from app.validations import fetch_one
+from app.utils import fetch_one
 
 
 class User(object):

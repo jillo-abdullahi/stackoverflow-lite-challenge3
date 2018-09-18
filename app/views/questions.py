@@ -8,7 +8,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from . import cursor, now
 from app.models.models import Question, Answer
-from app.validations import check_keys
+from app.utils import check_keys
 from instance.config import conn
 
 
