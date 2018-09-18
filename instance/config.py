@@ -5,13 +5,13 @@ import psycopg2
 # Connect to db based on environment
 if os.getenv('APP_SETTINGS') == 'testing':
     try:
-        conn = psycopg2.connect(os.getenv('DATABASE_TEST_URI'))
+        conn = psycopg2.connect(os.getenv('DATABASE_TEST_URL'))
     except (Exception, psycopg2.DatabaseError) as error:
         print("Error while connecting to PostgreSQL", error)
 
 elif os.getenv('APP_SETTINGS') == 'development':
     try:
-        conn = psycopg2.connect(os.getenv('DATABASE_URI'))
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
     except (Exception, psycopg2.DatabaseError) as error:
         print("Error while connecting to PostgreSQL", error)
 
@@ -20,6 +20,10 @@ class Config(object):
     """Configuration for parent class"""
     DEBUG = False
     TESTING = False
+
+
+class Production(object):
+    """Class for production"""
 
 
 class DevelopmentConfig(Config):
@@ -35,5 +39,6 @@ class TestConfig(Config):
 
 app_config = {
     'development': DevelopmentConfig,
-    'testing': TestConfig
+    'testing': TestConfig,
+    'production': Production
 }

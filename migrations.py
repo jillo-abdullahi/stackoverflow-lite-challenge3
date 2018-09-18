@@ -52,11 +52,5 @@ def migration():
     except (Exception, psycopg2.DatabaseError) as error:
         print("Error while creating PostgreSQL tables", error)
 
-    finally:
-        # close database connection.
-        if(conn):
-            cursor.close()
-            conn.close()
-            print("PostgreSQL connection is closed")
 
 migration()

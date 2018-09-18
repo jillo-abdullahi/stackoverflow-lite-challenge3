@@ -27,7 +27,7 @@ class User(object):
     @staticmethod
     def get_users(cursor):
         """
-        Instance method to get all users
+        method to get all users
         """
 
         query = "SELECT * FROM users;"
@@ -45,6 +45,24 @@ class User(object):
             results.append(details)
 
         return results
+
+    @staticmethod
+    def login_user(cursor, email, password):
+        """
+        method to check if user can login
+        """
+        query = "SELECT * FROM users WHERE (email=%s);"
+        cursor.execute(query, [email])
+        user = cursor.fetchone()
+
+        result = {}
+        result["user_id"] = user[0]
+        result["username"] = user[1]
+        result["email"] = user[2]
+        result["password"] = user[3]
+        result["confirm_password"] = user[4]
+
+        return result
 
 
 class Question(object):
@@ -109,6 +127,9 @@ class Question(object):
                 details = {}
                 details["date_created"] = answer[2]
                 details["title"] = answer[1]
+                details["preferred"] = answer[5]
+                details["id"] = answer[0]
+                details["user_id"] = answer[4]
                 ans_result.append(details)
 
         if question:
@@ -131,6 +152,18 @@ class Question(object):
         query = "DELETE FROM questions WHERE id=%s;"
         cursor.execute(query, [qn_id])
         conn.commit()
+
+    @staticmethod
+    def get_question_author(cursor, qn_id):
+        """
+        Method to get user id based on question
+        """
+        query = "SELECT user_id FROM questions WHERE id=%s"
+        cursor.execute(query, [qn_id])
+        result = cursor.fetchone()
+        conn.commit()
+
+        return result
 
 
 class Answer(object):
@@ -158,18 +191,70 @@ class Answer(object):
     @staticmethod
     def accept_answer(cursor, ans_id):
         """
-        Instance method to select answer as preferred
+        method to select answer as preferred
         """
 
         query = "UPDATE answers SET preferred=%s WHERE (id=%s);"
         cursor.execute(query, [True, ans_id])
         conn.commit()
 
-    def update_answer(self, cursor, description, ans_id):
+    @staticmethod
+    def update_answer(cursor, description, ans_id):
         """
-        Instance method to update details of an answer
+        method to update details of an answer
         """
 
         query = "UPDATE answers SET description=%s WHERE (id=%s);"
         cursor.execute(query, [description, ans_id])
         conn.commit()
+
+    @staticmethod
+    def get_answer_by_question_id(cursor, qn_id):
+        """
+        method to get a specific answer using question id
+        """
+        ans_query = "SELECT * FROM answers WHERE question_id=%s;"
+        cursor.execute(ans_query, [qn_id])
+        result = cursor.fetchone()
+
+        return result
+
+    @staticmethod
+    def delete_answer(cursor, qn_id):
+        """
+        method to delete answer
+        """
+        ans_query = "DELETE FROM answers WHERE question_id=%s;"
+        cursor.execute(ans_query, [qn_id])
+
+    @staticmethod
+    def get_user_by_answer_id(cursor, ans_id):
+        """
+        Get a specific answer using answer id
+        """
+        ans_query = "SELECT * FROM answers WHERE user_id=%s;"
+        cursor.execute(ans_query, [user_id])
+        answers = cursor.fetchall()
+
+        ans_result = []
+        if answers:
+            for answer in answers:
+                details = {}
+                details["date_created"] = answer[2]
+                details["title"] = answer[1]
+                details["preferred"] = answer[5]
+                details["id"] = answer[0]
+                ans_result.append(details)
+
+        return ans_result
+
+    @staticmethod
+    def get_answer_author(cursor, ans_id):
+        """
+        Method to get answer author
+        """
+        query = "SELECT user_id FROM answers WHERE id=%s"
+        cursor.execute(query, [ans_id])
+        result = cursor.fetchone()
+
+        return result

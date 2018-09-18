@@ -1,0 +1,21 @@
+sudo: true
+language: python
+matrix:
+  include:
+    - python: 3.6.0
+      env: TOXENV=py36
+services:
+  - postgresql
+# command to install dependencies
+install:
+  - "pip install -r requirements.txt"
+  - "pip install coveralls"
+# command to run tests
+before_script:
+  - psql -c 'create database stackoverflow_lite;' -U postgres
+  - python migrations.py
+script:
+  - nosetests --with-coverage --cover-package=app
+after_success:
+  - coveralls
+

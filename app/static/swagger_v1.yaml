@@ -1,0 +1,178 @@
+swagger: '2.0'
+info:
+  version: "1.0.0"
+  title: Stackoverflow-lite
+  description: >-
+    This web application is a platform that enables you to ask programming questions for those times when you get stuck and get answers from other like-minded individuals. What's even more fun is that you can provide your answers to questions from other programmers.
+host: 'stackoverflowlite-api.herokuapp.com'
+basePath: /stackoverflowlite/api/v1
+schemes:
+  - https
+produces:
+  - application/json
+consumes:
+  - application/json
+paths:
+  /auth/signup:
+    x-summary: Register.
+    post:
+      summary: Register (Sign up) new user
+      description: >-
+        Creates a new user. Once there is no existing user with same name user account is created.
+      parameters:
+        - in: body
+          name: user
+          description: The user to create.
+          schema:
+            $ref: '#/definitions/Register'
+      responses:
+        '201':
+          description: 'User registered successfully'
+        '400':
+          description: 'Invalid input or user already exists'
+      tags:
+        - Auth
+  /auth/login:
+    x-summary: Login
+    post:
+      summary: Login registered user
+      description: Login a user who has already been registered
+      parameters:
+        - in: body
+          name: login-info
+          description: login user.
+          schema:
+            $ref: '#/definitions/Login'
+      responses:
+        '200':
+          description: 'User authenticated'
+        '401':
+          description: 'Incorrect email or password'
+      tags:
+        - Auth
+  /questions:
+    x-summary: Question
+    get:
+      summary: Get all questions posted on the platform.
+      description: User can get all questions.
+      responses:
+        '200':
+          description: 'All questions posted returned'
+      tags:
+        - Questions  
+    post:
+      summary: Post a new question on the platform.
+      description: User can post a new question.
+      parameters:
+        - in: body
+          name: question
+          description: question to be posted.
+          schema:
+            $ref: '#/definitions/PostQuestion'
+      responses:
+        '201':
+          description: 'Question successfully posted'
+        '400':
+          description: 'Invalid input'
+      tags:
+        - Questions   
+  /questions/<question_id>:
+    x-summary: Question
+    get:
+      summary: Get specific question.
+      description: User can get a specified question.
+      parameters:
+        - name: id
+          in: header
+          description: question id
+          required: true
+          type: number
+      responses:
+        '200':
+          description: 'Question details returned'
+        '400':
+          description: 'Question with specified does not exist'
+      tags:
+        - Questions  
+  /questions/<question_id>/answers:
+    x-summary: Answers
+    post:
+      summary: Post an answer on the platform
+      description: User can post an answer to question
+      parameters:
+        - in: body
+          name: answer
+          description: answer to question
+          schema:
+            $ref: '#/definitions/PostAnswer'
+        - in: header
+          name: id
+          description: Id of question
+          required: true
+          type: number
+      responses:
+        '201':
+          description: 'Answer successfully posted'
+        '400':
+          description: 'Question with specified id does not exist'
+      tags:
+        - Answers
+  
+    
+definitions:
+  Register:
+    type: object
+    required:
+      - email
+      - username
+      - password
+      - confirm-password
+    properties:
+      email:
+        type: string
+      username:
+        type: string
+      password:
+        type: string
+      confirm-password:
+        type: string
+    example:
+      email: jayloabdullahi@gmail.com
+      username: JilloWoche
+      password: check1234
+      confirm-passwod: check1234
+  Login:
+    type: object
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    example:
+      email: jayloabdullahi@gmail.com
+      password: check1234
+  PostQuestion:
+    type: object
+    required:
+      - title
+      - description
+    properties:
+      title:
+        type: string
+      description:
+        type: string
+    example:
+      title: Exiting Vim on Ubuntu
+      description: How does one exit Vim on Ubuntu 16.04
+  PostAnswer:
+    type: object
+    required:
+      - description
+    properties:
+      description:
+        type: string
+    example:
+      description: Type Ctrl+O
