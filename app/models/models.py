@@ -129,7 +129,7 @@ class Question(object):
                 details["title"] = answer[1]
                 details["preferred"] = answer[5]
                 details["id"] = answer[0]
-                details["user_id"] = answer[3]
+                details["user_id"] = answer[4]
                 ans_result.append(details)
 
         if question:
