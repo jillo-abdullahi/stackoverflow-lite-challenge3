@@ -3,10 +3,33 @@ import re
 from flask import jsonify
 
 
+def validate_signup(args):
+    """
+    method to check keys for signup input fields
+    """
+    params = ['username', 'email', 'password', 'confirm-password']
+    length = 4
+
+    if check_keys(args, params, length):
+        return check_keys(args, params, length)
+
+    # Check if username is valid
+    if validate_username(args):
+        return validate_username(args)
+
+    # Check if email is valid
+    if validate_email(args):
+        return validate_email(args)
+
+    # Check password length
+    if validate_password(args):
+        return validate_password(args)
+
+
 def validate_email(args):
     """Function to validate username"""
     if not re.match(r'^[a-zA-Z0-9_\-\.]{3,}@.*\.[a-z]{2,4}$', args["email"]):
-        msg = "please enter valid email"
+        msg = "please enter a valid email"
         response = jsonify({"error": msg})
         response.status_code = 400
         return response
@@ -15,10 +38,10 @@ def validate_email(args):
 def validate_username(args):
     """Function to validate username"""
     if not re.match(r'^[a-zA-Z0-9]{5,20}$', args["username"]):
-        msg1 = "username should have "
-        msg2 = "between 5 and 20 characters and "
-        msg3 = "must contain letters or numbers only"
-        response = jsonify({"error": msg1 + msg2 + msg3})
+        message = """username should have "
+                between 5 and 20 characters and
+                must contain letters or numbers only"""
+        response = jsonify({"error": message})
         response.status_code = 400
         return response
 
