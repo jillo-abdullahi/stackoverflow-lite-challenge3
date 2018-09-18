@@ -36,12 +36,14 @@ class User(object):
 
         results = []
         for user in all_users:
-            details = {}
-            details["user_id"] = user[0]
-            details["username"] = user[1]
-            details["email"] = user[2]
-            details["password"] = user[3]
-            details["confirm_password"] = user[4]
+            details = {
+                "user_id": user[0],
+                "username": user[1],
+                "email": user[2],
+                "password": user[3],
+                "confirm_password": user[4]
+            }
+
             results.append(details)
 
         return results
@@ -55,12 +57,13 @@ class User(object):
         cursor.execute(query, [email])
         user = cursor.fetchone()
 
-        result = {}
-        result["user_id"] = user[0]
-        result["username"] = user[1]
-        result["email"] = user[2]
-        result["password"] = user[3]
-        result["confirm_password"] = user[4]
+        result = {
+            "user_id": user[0],
+            "username": user[1],
+            "email": user[2],
+            "password": user[3],
+            "confirm_password": user[4]
+        }
 
         return result
 
@@ -97,12 +100,14 @@ class Question(object):
 
         results = []
         for question in all_questions:
-            details = {}
-            details["question_id"] = question[0]
-            details["title"] = question[1]
-            details["description"] = question[2]
-            details["date_created"] = question[3]
-            details["user_id"] = question[4]
+            details = {
+                "question_id": question[0],
+                "title": question[1],
+                "description": question[2],
+                "date_created": question[3],
+                "user_id": question[4]
+            }
+
             results.append(details)
 
         return results
@@ -124,21 +129,25 @@ class Question(object):
         ans_result = []
         if answers:
             for answer in answers:
-                details = {}
-                details["date_created"] = answer[2]
-                details["title"] = answer[1]
-                details["preferred"] = answer[5]
-                details["id"] = answer[0]
-                details["user_id"] = answer[4]
+                details = {
+                    "date_created": answer[2],
+                    "title": answer[1],
+                    "preferred": answer[5],
+                    "id": answer[0],
+                    "user_id": answer[4]
+                }
+
                 ans_result.append(details)
 
         if question:
-            details = {}
-            details["question_id"] = question[0]
-            details["title"] = question[1]
-            details["description"] = question[2]
-            details["date_created"] = question[3]
-            details["user_id"] = question[4]
+            details = {
+                "question_id": question[0],
+                "title": question[1],
+                "description": question[2],
+                "date_created": question[3],
+                "user_id": question[4]
+            }
+
             details["Answers"] = ans_result
 
             return details
@@ -239,11 +248,13 @@ class Answer(object):
         ans_result = []
         if answers:
             for answer in answers:
-                details = {}
-                details["date_created"] = answer[2]
-                details["title"] = answer[1]
-                details["preferred"] = answer[5]
-                details["id"] = answer[0]
+                details = {
+                    "date_created": answer[2],
+                    "title": answer[1],
+                    "preferred": answer[5],
+                    "id": answer[0]
+                }
+
                 ans_result.append(details)
 
         return ans_result
