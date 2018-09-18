@@ -5,13 +5,13 @@ import psycopg2
 # Connect to db based on environment
 if os.getenv('APP_SETTINGS') == 'testing':
     try:
-        conn = psycopg2.connect(os.getenv('DATABASE_TEST_URI'))
+        conn = psycopg2.connect(os.getenv('DATABASE_TEST_URL'))
     except (Exception, psycopg2.DatabaseError) as error:
         print("Error while connecting to PostgreSQL", error)
 
 elif os.getenv('APP_SETTINGS') == 'development':
     try:
-        conn = psycopg2.connect(os.getenv('DATABASE_URI'))
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
     except (Exception, psycopg2.DatabaseError) as error:
         print("Error while connecting to PostgreSQL", error)
 
