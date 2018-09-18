@@ -16,6 +16,7 @@ def create_app(config_name):
     app.config.from_object(app_config[config_name])
     app.url_map.strict_slashes = False
     app.config['JWT_SECRET_KEY'] = os.getenv('SECRET')
+    app.config['DATABASE_URI'] = os.environ['DATABASE_URL']
     jwt = JWTManager(app)
 
     api = Api(app)
