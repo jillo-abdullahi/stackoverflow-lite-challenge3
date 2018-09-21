@@ -43,7 +43,7 @@ class TestUserCanSignup(unittest.TestCase):
 
         # Test message
         message = json.loads(response.data)['error']
-        self.assertEqual(message, 'please enter valid email')
+        self.assertEqual(message, 'please enter a valid email')
 
     def test_empty_username(self):
         """

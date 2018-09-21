@@ -7,8 +7,8 @@ from flask_jwt_extended import create_access_token
 
 from . import cursor
 from app.models.models import User
-from app.utilities import validate_username, validate_email, validate_password
-from app.utilities import check_keys
+from app.utils import validate_signup
+from app.utils import check_keys
 from instance.config import conn
 
 
@@ -24,24 +24,8 @@ class UserSignup(Resource):
         user_details = request.get_json()
 
         # Check if all required fields have been provided
-        params = ['username', 'email', 'password', 'confirm-password']
-        length = 4
-
-        # Check fields provided
-        if check_keys(user_details, params, length):
-            return check_keys(user_details, params, length)
-
-        # Check if username is valid
-        if validate_username(user_details):
-            return validate_username(user_details)
-
-        # Check if email is valid
-        if validate_email(user_details):
-            return validate_email(user_details)
-
-        # Check password length
-        if validate_password(user_details):
-            return validate_password(user_details)
+        if validate_signup(user_details):
+            return validate_signup(user_details)
 
         # Check if passwords provided match
         password = user_details["password"]
