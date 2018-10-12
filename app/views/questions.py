@@ -1,5 +1,5 @@
 """module for all things questions"""
-
+import time
 import psycopg2
 from flask import request, jsonify
 from flask_restful import Resource
@@ -34,10 +34,12 @@ class QuestionsView(Resource):
         # Check if question has already been asked
         try:
             questions = Question.get_all_questions(cursor)
+
             if questions:
                 for question in questions:
                     if question["title"] == question_details["title"]:
-                        response = jsonify({"error": "question already asked"})
+                        response = jsonify(
+                            {"error": "That question has already been asked. Please ask another."})
                         response.status_code = 400
                         return response
         except (Exception, psycopg2.DatabaseError) as error:
@@ -45,10 +47,13 @@ class QuestionsView(Resource):
                 return "Failed to get questions. {}".format(error)
         # Validation checks passed.
 
+        # Get time
+        current_time = time.localtime()
+
         current_user = get_jwt_identity()
         title = question_details["title"]
         description = question_details["description"]
-        date_created = (now.strftime("%d-%m-%Y %H:%M:%S"))
+        date_created = time.strftime("%d-%m-%Y %H:%M:%S", current_time)
         user_id = current_user["user_id"]
 
         try:
@@ -71,6 +76,7 @@ class QuestionsView(Resource):
         """
         try:
             questions = Question.get_all_questions(cursor)
+
             if not questions:
                 response = jsonify({"message": "no questions yet"})
                 response.status_code = 404
@@ -80,7 +86,31 @@ class QuestionsView(Resource):
             return response
         except (Exception, psycopg2.DatabaseError) as error:
             if(conn):
-                return "failed to fetch questions. {}".format(error)
+                return "failed to fetch all questions. {}".format(error)
+
+
+class QuestionsByUserView(Resource):
+    """
+    Class to list questions by a specific user
+    """
+    @jwt_required
+    def get(self, user_id):
+        """
+        get questions by a given user
+        """
+        try:
+            questions = Question.get_questions_by_user(cursor, user_id)
+            if not questions:
+                response = jsonify(
+                    {"message": "You haven't asked any questions yet"})
+                response.status_code = 404
+                return response
+            response = jsonify({"questions": questions})
+            response.status_code = 200
+            return response
+        except (Exception, psycopg2.DatabaseError) as error:
+            if(conn):
+                return "failed to fetch question by user. {}".format(error)
 
 
 class QuestionView(Resource):

@@ -1,5 +1,6 @@
 """Module for all things answers"""
 import psycopg2
+import time
 from flask import request, jsonify
 from flask_restful import Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -30,11 +31,11 @@ class AnswersView(Resource):
             return check_keys(answer_details, params, length)
 
         # post answer
+        current_time = time.localtime()
         current_user = get_jwt_identity()
         description = answer_details["description"]
-        date_created = (now.strftime("%d-%m-%Y %H:%M:%S"))
+        date_created = time.strftime("%d-%m-%Y %H:%M:%S", current_time)
         user_id = current_user["user_id"]
-        question_author = Question.get_question_author(cursor, qn_id)
 
         try:
 
@@ -44,23 +45,34 @@ class AnswersView(Resource):
                 response.status_code = 404
                 return response
 
-            # Check if user can answer their own question
-            if user_id != question_author[0]:
-                answer = Answer(description, date_created, user_id, qn_id)
-                answer.post_answer(cursor)
-
-                response = jsonify({"message": "answer successfully posted"})
-                response.status_code = 201
-                return response
-            else:
-                message = "you cannot answer your own question"
-                response = jsonify({"message": message})
-                response.status_code = 403
-                return response
+            answer = Answer(description, date_created, user_id, qn_id)
+            answer.post_answer(cursor)
+            response = jsonify({"message": "answer successfully posted"})
+            response.status_code = 201
+            return response
 
         except (Exception, psycopg2.DatabaseError) as error:
             if(conn):
                 return "Failed to post answer. {}".format(error)
+
+    @jwt_required
+    def get(self, user_id):
+        """
+        Get all answers posted by a user
+        """
+        try:
+            answers = Answer.get_answers_by_user(cursor, user_id)
+            if not answers:
+                message = "You haven't answered any questions yet"
+                response = jsonify({"message": message})
+                response.status_code = 404
+                return response
+            response = jsonify({"Answers": answers})
+            response.status_code = 200
+            return response
+        except (Exception, psycopg2.DatabaseError) as error:
+            if(conn):
+                return "Failed to get answers. {}".format(error)
 
 
 class AnswerView(Resource):
@@ -76,43 +88,94 @@ class AnswerView(Resource):
         user_id = current_user["user_id"]
         answer_author = Answer.get_answer_author(cursor, ans_id)
         question_author = Question.get_question_author(cursor, qn_id)
+        answer_details = request.get_json()
 
         # Updating answer
         try:
-            if user_id == answer_author[0]:
-                answer_details = request.get_json()
-
+            if bool(answer_details):
+                # check input
                 params = ["description"]
                 length = 1
 
                 if check_keys(answer_details, params, length):
                     return check_keys(answer_details, params, length)
 
-                description = answer_details["description"]
+                if user_id == answer_author[0]:
+                    answer_details = request.get_json()
 
-                Answer.update_answer(cursor, description, ans_id)
-                message = "answer successfully updated"
-                response = jsonify({"message": message})
-                response.status_code = 200
-                return response
-            else:
-                message = "non-author: you cannot update this answer"
-                response = jsonify({"message": message})
-                response.status_code = 403
-                return response
+                    description = answer_details["description"]
 
-            if user_id == question_author[0]:
-                Answer.accept_answer(cursor, ans_id)
-                message = "answer status successfully updated"
-                response = jsonify({"message": message})
-                response.status_code = 200
-                return response
+                    Answer.update_answer(cursor, description, ans_id)
+                    message = "Answer successfully updated"
+                    response = jsonify({"message": message})
+                    response.status_code = 200
+                    return response
+                else:
+                    message = "Non-author: you cannot update this answer"
+                    response = jsonify({"message": message})
+                    response.status_code = 403
+                    return response
             else:
-                message = "non-author: you did not author this question to accept answer"
-                response = jsonify({"message": message})
-                response.status_code = 403
-                return response
+                if user_id == question_author[0]:
+                    Answer.accept_answer(cursor, ans_id)
+                    message = "Answer status successfully updated"
+                    response = jsonify({"message": message})
+                    response.status_code = 200
+                    return response
+                else:
+                    message = "Non-author: you did not author this question to accept answer"
+                    response = jsonify({"message": message})
+                    response.status_code = 403
+                    return response
 
         except (Exception, psycopg2.DatabaseError) as error:
             if(conn):
                 return "Failed to update answer. {}".format(error)
+
+
+class AnswersByUserView(Resource):
+    """
+    Class to get all answers posted by a given user
+    """
+    @jwt_required
+    def get(self, user_id):
+        """
+        Get all answers by a given user
+        """
+        try:
+            answers = Answer.get_answers_by_user(cursor, user_id)
+            if not answers:
+                message = "you have not answered any questions yet"
+                response = jsonify({"message": message})
+                response.status_code = 404
+                return response
+            response = jsonify({"message": answers})
+            response.status_code = 200
+            return response
+        except (Exception, psycopg2.DatabaseError) as error:
+            if(conn):
+                return "Failed to update answer. {}".format(error)
+
+
+class AnswerDescriptionView(Resource):
+    """
+    Class to get description for a specific answer
+    """
+    @jwt_required
+    def get(self, ans_id):
+        """
+        Get description for a specific answer
+        """
+        try:
+            description = Answer.get_answer_title(cursor, ans_id)
+            if not description:
+                message = "answer was not found"
+                response = jsonify({"message": message})
+                response.status_code = 404
+                return response
+            response = jsonify({"message": description})
+            response.status_code = 200
+            return response
+        except (Exception, psycopg2.DatabaseError) as error:
+            if(conn):
+                return "Failed to get answer description. {}".format(error)

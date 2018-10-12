@@ -50,6 +50,15 @@ class User(object):
         return results
 
     @staticmethod
+    def get_user(cursor, username):
+        """
+        method to get user_id by username
+        """
+        query = "SELECT id FROM users WHERE username=%s"
+        user_id = fetch_one(query, username)
+        return user_id
+
+    @staticmethod
     def login_user(cursor, email, password):
         """
         method to check if user can login
@@ -100,6 +109,27 @@ class Question(object):
 
         results = []
         for question in all_questions:
+
+            ans_query = "SELECT * FROM answers WHERE question_id=%s"
+            cursor.execute(ans_query, (question[0],))
+            answers = cursor.fetchall()
+
+            # Get username
+            user_query = "SELECT username FROM users WHERE id=%s"
+            username = fetch_one(user_query, (question[4],))
+
+            ans_result = []
+            if answers:
+                for answer in answers:
+                    detail = {
+                        "date_created": answer[2],
+                        "title": answer[1],
+                        "preferred": answer[5],
+                        "id": answer[0],
+                        "user_id": answer[4]
+                    }
+                    ans_result.append(detail)
+
             details = {
                 "question_id": question[0],
                 "title": question[1],
@@ -107,7 +137,8 @@ class Question(object):
                 "date_created": question[3],
                 "user_id": question[4]
             }
-
+            details["Answers"] = ans_result
+            details["username"] = username
             results.append(details)
 
         return results
@@ -122,17 +153,25 @@ class Question(object):
         question = fetch_one(qn_query, qn_id)
 
         ans_query = "SELECT * FROM answers WHERE question_id=%s"
-        answers = fetch_one(ans_query, qn_id)
+        cursor.execute(ans_query, [qn_id])
+        answers = cursor.fetchall()
+
+        # Get username
+        user_query = "SELECT username FROM users WHERE id=%s"
+        username = fetch_one(user_query, (question[4],))
 
         ans_result = []
         if answers:
             for answer in answers:
+                user_query = "SELECT username FROM users WHERE id=%s"
+                ans_username = fetch_one(user_query, (answer[4],))
                 details = {
                     "date_created": answer[2],
                     "title": answer[1],
                     "preferred": answer[5],
                     "id": answer[0],
-                    "user_id": answer[4]
+                    "user_id": answer[4],
+                    "username": ans_username
                 }
 
                 ans_result.append(details)
@@ -145,7 +184,7 @@ class Question(object):
                 "date_created": question[3],
                 "user_id": question[4]
             }
-
+            details["username"] = username
             details["Answers"] = ans_result
 
             return details
@@ -153,7 +192,7 @@ class Question(object):
     @staticmethod
     def delete_question(cursor, qn_id):
         """
-        Instance method to delete a question
+        method to delete a question
         """
 
         query = "DELETE FROM questions WHERE id=%s;"
@@ -169,6 +208,52 @@ class Question(object):
         result = fetch_one(query, qn_id)
 
         return result
+
+    @staticmethod
+    def get_questions_by_user(cursor, user_id):
+        """
+        method to list questions asked by a given user
+        """
+        query = "SELECT * FROM questions WHERE user_id=%s;"
+        cursor.execute(query, (user_id,))
+        all_questions = cursor.fetchall()
+
+        results = []
+        for question in all_questions:
+
+            ans_query = "SELECT * FROM answers WHERE question_id=%s"
+            cursor.execute(ans_query, (question[0],))
+            answers = cursor.fetchall()
+
+            # Get username
+            user_query = "SELECT username FROM users WHERE id=%s"
+            cursor.execute(user_query, (question[4],))
+            username = cursor.fetchone()
+
+            ans_result = []
+            if answers:
+                for answer in answers:
+                    detail = {
+                        "date_created": answer[2],
+                        "title": answer[1],
+                        "preferred": answer[5],
+                        "id": answer[0],
+                        "user_id": answer[4]
+                    }
+                    ans_result.append(detail)
+
+            details = {
+                "question_id": question[0],
+                "title": question[1],
+                "description": question[2],
+                "date_created": question[3],
+                "user_id": question[4]
+            }
+            details["Answers"] = ans_result
+            details["username"] = username
+            results.append(details)
+
+        return results
 
 
 class Answer(object):
@@ -224,17 +309,28 @@ class Answer(object):
         return result
 
     @staticmethod
-    def delete_answer(cursor, qn_id):
+    def get_answer_title(cursor, ans_id):
+        """
+        method to get answer body
+        """
+        query = "SELECT description FROM answers WHERE (id=%s);"
+        cursor.execute(query, [ans_id])
+        description = cursor.fetchone()
+
+        return description
+
+    @staticmethod
+    def delete_answer(cursor, ans_id):
         """
         method to delete answer
         """
         ans_query = "DELETE FROM answers WHERE question_id=%s;"
-        cursor.execute(ans_query, [qn_id])
+        cursor.execute(ans_query, [ans_id])
 
     @staticmethod
-    def get_user_by_answer_id(cursor, user_id):
+    def get_answers_by_user(cursor, user_id):
         """
-        Get a specific answer using answer id
+        Get answers posted by a given user
         """
         ans_query = "SELECT * FROM answers WHERE user_id=%s;"
         cursor.execute(ans_query, [user_id])

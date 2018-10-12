@@ -10,7 +10,7 @@ def validate_signup(args):
     """
     method to check keys for signup input fields
     """
-    params = ['username', 'email', 'password', 'confirm-password']
+    params = ['username', 'email', 'password', 'confirm']
     length = 4
 
     if check_keys(args, params, length):
@@ -32,7 +32,7 @@ def validate_signup(args):
 def validate_email(args):
     """Function to validate username"""
     if not re.match(r'^[a-zA-Z0-9_\-\.]{3,}@.*\.[a-z]{2,4}$', args["email"]):
-        msg = "please enter a valid email"
+        msg = "Please enter a valid email"
         response = jsonify({"error": msg})
         response.status_code = 400
         return response
@@ -41,7 +41,7 @@ def validate_email(args):
 def validate_username(args):
     """Function to validate username"""
     if not re.match(r'^[a-zA-Z0-9]{5,20}$', args["username"]):
-        message = """username should have "
+        message = """Username should have
                 between 5 and 20 characters and
                 must contain letters or numbers only"""
         response = jsonify({"error": message})
@@ -52,7 +52,7 @@ def validate_username(args):
 def validate_password(args):
     """Function to check password length"""
     if not re.match(r'^[\w\W]{6,}$', args["password"]):
-        msg = "password must have at least 6 characters"
+        msg = "Password should have at least 6 characters"
         response = jsonify({"error": msg})
         response.status_code = 400
         return response

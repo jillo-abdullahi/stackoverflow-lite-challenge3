@@ -4,6 +4,7 @@ from flask import request, jsonify
 from flask_restful import Resource
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
+from flask_jwt_extended import jwt_required
 
 from . import cursor
 from app.models.models import User
@@ -29,7 +30,7 @@ class UserSignup(Resource):
 
         # Check if passwords provided match
         password = user_details["password"]
-        confirm_password = user_details["confirm-password"]
+        confirm_password = user_details["confirm"]
         if password != confirm_password:
             msg = "passwords provided do not match"
             response = jsonify({"error": msg})
@@ -67,7 +68,7 @@ class UserSignup(Resource):
         try:
             user = User(username, email, password, confirm_password)
             user.register_user(cursor)
-            message = "user registered successfully"
+            message = "you have been registered successfully."
             response = jsonify({"message": message})
             response.status_code = 201
             return response
@@ -102,7 +103,7 @@ class UserLogin(Resource):
             user = User.login_user(cursor, email, password)
         except (Exception, psycopg2.DatabaseError) as error:
             message = "incorrect username or password"
-            response = jsonify({"login failed": message})
+            response = jsonify({"error": message})
             response.status_code = 401
             return response
 
@@ -117,13 +118,36 @@ class UserLogin(Resource):
                 access_token = create_access_token(identity=identity_dict)
 
                 # return responses
-                message = "logged in as {}".format(username)
                 response = jsonify(
-                    {"success": message, "access_token": access_token})
+                    {"success": username, "user_id": user_id, "access_token": access_token})
                 response.status_code = 200
                 return response
             else:
                 message = "incorrect username or password"
-                response = jsonify({"login failed": message})
+                response = jsonify({"error": message})
                 response.status_code = 401
                 return response
+
+
+class UserView(Resource):
+    """
+    Class for all things specific to one use
+    """
+    @jwt_required
+    def get(self, username):
+        """
+        Get user id using username
+        """
+        try:
+            user_id = User.get_user(cursor, username)
+            if not user_id:
+                message = "User was not found"
+                response = jsonify({"message": message})
+                response.status_code = 404
+                return response
+            response = jsonify({"user": user_id})
+            response.status_code = 200
+            return response
+        except (Exception, psycopg2.DatabaseError) as error:
+            if(conn):
+                return "Failed to get user. {}".format(error)
