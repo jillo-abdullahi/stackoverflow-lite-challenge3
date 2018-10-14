@@ -123,18 +123,16 @@ class QuestionView(Resource):
         get a specific question"""
         try:
             question = Question.get_one_question(cursor, qn_id)
-            if not question:
-                response = jsonify({"error": "question doesn't exist"})
-                response.status_code = 404
-                return response
 
             response = jsonify({"question": question})
             response.status_code = 200
             return response
-
         except (Exception, psycopg2.DatabaseError) as error:
             if(conn):
-                return "Failed to fetch question. {}".format(error)
+                msg = "Sorry, question with that id does not exist."
+                response = jsonify({"error": msg})
+                response.status_code = 404
+                return response
 
     @jwt_required
     def delete(self, qn_id):

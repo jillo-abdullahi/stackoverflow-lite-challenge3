@@ -2,10 +2,13 @@ swagger: '2.0'
 info:
   version: "1.0.0"
   title: Stackoverflow-lite
+  license:
+    name: MIT
+    url: https://github.com/jillo-abdullahi/stackoverflow-lite-challenge3/blob/master/LICENSE
   description: >-
     This web application is a platform that enables you to ask programming questions for those times when you get stuck and get answers from other like-minded individuals. What's even more fun is that you can provide your answers to questions from other programmers.
-# host: 'stackoverflowlite-api.herokuapp.com'
-# basePath: /stackoverflowlite/api/v1
+host: 'stackoverflowlite-api.herokuapp.com'
+basePath: /stackoverflowlite/api/v1
 schemes:
   - https
 produces:
@@ -61,7 +64,7 @@ paths:
       summary: Get all questions.
       description: Logged in user can get questions posted by all other users.
       parameters: 
-      - name: Authorization token
+      - name: Authorization
         in: header
         description: Access token
         required: true
@@ -73,13 +76,15 @@ paths:
           description: 'There are no questions that have been posted yet.'
         '401':
           description: 'Authorization token has not been provided or is invalid.'
+        '422':
+          description: 'Bad authorization header. Should start with Bearer and then the token'
       tags:
         - Questions  
     post:
       summary: Post a new question on the platform.
       description: User can post a new question.
       parameters:
-      - name: Authorization token
+      - name: Authorization
         in: header
         description: Access token
         required: true
@@ -99,20 +104,22 @@ paths:
             2. Title or description field has been left empty.
         '401':
           description: 'Authorization token has not been provided or is invalid'
+        '422':
+          description: 'Bad authorization header. Should start with Bearer and then the token'
       tags:
         - Questions   
-  /questions/<question_id>:
+  /questions/{question_id}:
     x-summary: Question
     get:
       summary: Get specific question.
       description: Get a specific question using id and return it.
       parameters:
-        - name: id
+        - name: question_id
           in: path
           description: Id of question to be fetched.
           required: true
           type: number
-        - name: Authorization token
+        - name: Authorization
           in: header
           description: Access token
           required: true
@@ -124,33 +131,41 @@ paths:
           description: 'Question with the specified id does not exist'
         '401':
           description: 'Authorization token has not been provided or is invalid'
+        '422':
+          description: 'Bad authorization header. Should start with Bearer and then the token'
       tags:
         - Questions  
-  /questions/<question_id>/answers:
+  /questions/{question_id}/answers:
     x-summary: Answers
     post:
       summary: Post an answer on the platform
       description: User can post an answer to question
       parameters:
+        - name: question_id
+          in: path
+          description: Id of question to be answered.
+          required: true
+          type: number
+        - name: Authorization
+          in: header
+          description: Access token
+          required: true
+          type: string
         - in: body
           name: answer
           description: answer to question
           schema:
             $ref: '#/definitions/PostAnswer'
-        - in: header
-          name: id
-          description: Id of question
-          required: true
-          type: number
       responses:
         '201':
           description: 'Answer successfully posted'
         '400':
           description: 'Question with specified id does not exist'
+        '422':
+          description: 'Bad authorization header. Should start with Bearer and then the token'
       tags:
         - Answers
   
-    
 definitions:
   Register:
     type: object
@@ -208,6 +223,3 @@ definitions:
         type: string
     example:
       description: Type Ctrl+O
-# Added by API Auto Mocking Plugin
-host: virtserver.swaggerhub.com
-basePath: /jillo-abdullahi/stackoverflow-lite/1.0.0
