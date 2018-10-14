@@ -4,8 +4,8 @@ info:
   title: Stackoverflow-lite
   description: >-
     This web application is a platform that enables you to ask programming questions for those times when you get stuck and get answers from other like-minded individuals. What's even more fun is that you can provide your answers to questions from other programmers.
-host: 'stackoverflowlite-api.herokuapp.com'
-basePath: /stackoverflowlite/api/v1
+# host: 'stackoverflowlite-api.herokuapp.com'
+# basePath: /stackoverflowlite/api/v1
 schemes:
   - https
 produces:
@@ -18,80 +18,112 @@ paths:
     post:
       summary: Register (Sign up) new user
       description: >-
-        Creates a new user. Once there is no existing user with same name user account is created.
+        Create a new user. New user can only be added if there is no existing user with the same username or email provided has not already been registered.
       parameters:
         - in: body
-          name: user
-          description: The user to create.
+          name: User registration information.
+          description: Details of user to be created.
           schema:
             $ref: '#/definitions/Register'
       responses:
         '201':
-          description: 'User registered successfully'
+          description: 'User has been registered successfully'
         '400':
-          description: 'Invalid input or user already exists'
+          description: |-
+            Response is returned if
+            1. Username has already been taken
+            2. Email has already been registered
+            3. Password and confirm password do not match
+            4. There are fields that have been left empty.
       tags:
         - Auth
   /auth/login:
     x-summary: Login
     post:
       summary: Login registered user
-      description: Login a user who has already been registered
+      description: Sign in a user who has already been registered.
       parameters:
         - in: body
-          name: login-info
-          description: login user.
+          name: login information
+          description: User email and password to be used for authentication.
           schema:
             $ref: '#/definitions/Login'
       responses:
         '200':
-          description: 'User authenticated'
+          description: 'User has been successfully authenticated'
         '401':
-          description: 'Incorrect email or password'
+          description: 'User email or password is incorrect'
       tags:
         - Auth
   /questions:
     x-summary: Question
     get:
-      summary: Get all questions posted on the platform.
-      description: User can get all questions.
+      summary: Get all questions.
+      description: Logged in user can get questions posted by all other users.
+      parameters: 
+      - name: Authorization token
+        in: header
+        description: Access token
+        required: true
+        type: string
       responses:
         '200':
-          description: 'All questions posted returned'
+          description: 'All questions posted returned.'
+        '404':
+          description: 'There are no questions that have been posted yet.'
+        '401':
+          description: 'Authorization token has not been provided or is invalid.'
       tags:
         - Questions  
     post:
       summary: Post a new question on the platform.
       description: User can post a new question.
       parameters:
-        - in: body
-          name: question
-          description: question to be posted.
-          schema:
-            $ref: '#/definitions/PostQuestion'
+      - name: Authorization token
+        in: header
+        description: Access token
+        required: true
+        type: string
+      - in: body
+        name: Question details
+        description: Title and description of question to be posted.
+        schema:
+          $ref: '#/definitions/PostQuestion'
       responses:
         '201':
           description: 'Question successfully posted'
         '400':
-          description: 'Invalid input'
+          description: |-
+            Response is returned if
+            1. Question already exists based on question title.
+            2. Title or description field has been left empty.
+        '401':
+          description: 'Authorization token has not been provided or is invalid'
       tags:
         - Questions   
   /questions/<question_id>:
     x-summary: Question
     get:
       summary: Get specific question.
-      description: User can get a specified question.
+      description: Get a specific question using id and return it.
       parameters:
         - name: id
-          in: header
-          description: question id
+          in: path
+          description: Id of question to be fetched.
           required: true
           type: number
+        - name: Authorization token
+          in: header
+          description: Access token
+          required: true
+          type: string
       responses:
         '200':
           description: 'Question details returned'
         '400':
-          description: 'Question with specified does not exist'
+          description: 'Question with the specified id does not exist'
+        '401':
+          description: 'Authorization token has not been provided or is invalid'
       tags:
         - Questions  
   /questions/<question_id>/answers:
@@ -126,7 +158,7 @@ definitions:
       - email
       - username
       - password
-      - confirm-password
+      - confirm
     properties:
       email:
         type: string
@@ -140,7 +172,7 @@ definitions:
       email: jayloabdullahi@gmail.com
       username: JilloWoche
       password: check1234
-      confirm-passwod: check1234
+      confirm: check1234
   Login:
     type: object
     required:
@@ -176,3 +208,6 @@ definitions:
         type: string
     example:
       description: Type Ctrl+O
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /jillo-abdullahi/stackoverflow-lite/1.0.0
