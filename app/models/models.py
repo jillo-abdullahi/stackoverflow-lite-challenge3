@@ -149,8 +149,9 @@ class Question(object):
         Instance method to fetch a specific question
         """
 
-        qn_query = "SELECT * FROM questions WHERE id=%s;"
-        question = fetch_one(qn_query, qn_id)
+        qn_query = "SELECT * FROM questions WHERE id={}".format(qn_id)
+        cursor.execute(qn_query)
+        question = cursor.fetchone()
 
         ans_query = "SELECT * FROM answers WHERE question_id=%s"
         cursor.execute(ans_query, [qn_id])
