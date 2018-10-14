@@ -32,7 +32,7 @@ class UserSignup(Resource):
         password = user_details["password"]
         confirm_password = user_details["confirm"]
         if password != confirm_password:
-            msg = "passwords provided do not match"
+            msg = "Passwords provided do not match"
             response = jsonify({"error": msg})
             response.status_code = 400
             return response
@@ -43,13 +43,13 @@ class UserSignup(Resource):
             if users:
                 for user in users:
                     if user["username"] == user_details["username"]:
-                        message = "username has already been taken"
+                        message = "Username has already been taken"
                         response = jsonify({"error": message})
                         response.status_code = 400
                         return response
 
                     if user["email"] == user_details["email"]:
-                        message = "email has already been registered"
+                        message = "Email has already been registered"
                         response = jsonify({"error": message})
                         response.status_code = 400
                         return response
@@ -68,7 +68,7 @@ class UserSignup(Resource):
         try:
             user = User(username, email, password, confirm_password)
             user.register_user(cursor)
-            message = "you have been registered successfully."
+            message = "You have been registered successfully."
             response = jsonify({"message": message})
             response.status_code = 201
             return response
@@ -102,7 +102,7 @@ class UserLogin(Resource):
         try:
             user = User.login_user(cursor, email, password)
         except (Exception, psycopg2.DatabaseError) as error:
-            message = "incorrect username or password"
+            message = "Incorrect username or password"
             response = jsonify({"error": message})
             response.status_code = 401
             return response
@@ -116,14 +116,15 @@ class UserLogin(Resource):
                 # create access token with username and id
                 identity_dict = {'user_id': user_id, 'username': username}
                 access_token = create_access_token(identity=identity_dict)
+                message = "Login successful"
 
                 # return responses
                 response = jsonify(
-                    {"success": username, "user_id": user_id, "access_token": access_token})
+                    {"success": username, "user_id": user_id, "access_token": access_token, "message": message})
                 response.status_code = 200
                 return response
             else:
-                message = "incorrect username or password"
+                message = "Incorrect username or password"
                 response = jsonify({"error": message})
                 response.status_code = 401
                 return response

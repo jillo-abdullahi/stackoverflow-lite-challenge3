@@ -53,14 +53,14 @@ class QuestionsView(Resource):
         current_user = get_jwt_identity()
         title = question_details["title"]
         description = question_details["description"]
-        date_created = time.strftime("%d-%m-%Y %H:%M:%S", current_time)
+        date_created = time.strftime("%d-%m-%Y %H:%M", current_time)
         user_id = current_user["user_id"]
 
         try:
             question = Question(title, description, date_created, user_id)
             question.post_question(cursor)
 
-            response = jsonify({"message": "question successfully posted"})
+            response = jsonify({"message": "Question successfully posted"})
             response.status_code = 201
             return response
 
@@ -78,7 +78,7 @@ class QuestionsView(Resource):
             questions = Question.get_all_questions(cursor)
 
             if not questions:
-                response = jsonify({"message": "no questions yet"})
+                response = jsonify({"message": "No questions yet"})
                 response.status_code = 404
                 return response
             response = jsonify({"questions": questions})
@@ -145,19 +145,14 @@ class QuestionView(Resource):
         current_user = get_jwt_identity()
         try:
             question = Question.get_one_question(cursor, qn_id)
-            if not question:
-                response = jsonify({"error": "question doesn't exist"})
-                response.status_code = 404
-                return response
 
             # Check if current user owns question.
-
             if current_user["user_id"] == question["user_id"]:
                 # Delete answers associated first
                 Answer.delete_answer(cursor, qn_id)
                 Question.delete_question(cursor, qn_id)
                 response = jsonify(
-                    {"message": "question deleted successfully"})
+                    {"message": "Question deleted successfully"})
                 response.status_code = 200
                 return response
             message = "You are not the author of this question"
@@ -168,4 +163,7 @@ class QuestionView(Resource):
 
         except (Exception, psycopg2.DatabaseError) as error:
             if(conn):
-                return "Failed to delete question. {}".format(error)
+                msg = "Sorry, question with that id does not exist"
+                response = jsonify({"error": msg})
+                response.status_code = 404
+                return response

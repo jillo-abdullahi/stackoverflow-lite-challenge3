@@ -34,26 +34,24 @@ class AnswersView(Resource):
         current_time = time.localtime()
         current_user = get_jwt_identity()
         description = answer_details["description"]
-        date_created = time.strftime("%d-%m-%Y %H:%M:%S", current_time)
+        date_created = time.strftime("%d-%m-%Y %H:%M", current_time)
         user_id = current_user["user_id"]
 
         try:
-
-            question = Question.get_one_question(cursor, qn_id)
-            if not question:
-                response = jsonify({"error": "question doesn't exist"})
-                response.status_code = 404
-                return response
+            Question.get_one_question(cursor, qn_id)
 
             answer = Answer(description, date_created, user_id, qn_id)
             answer.post_answer(cursor)
-            response = jsonify({"message": "answer successfully posted"})
+            response = jsonify({"message": "Answer posted successfully"})
             response.status_code = 201
             return response
 
         except (Exception, psycopg2.DatabaseError) as error:
             if(conn):
-                return "Failed to post answer. {}".format(error)
+                msg = "Sorry, question with that id does not exist"
+                response = jsonify({"error": msg})
+                response.status_code = 404
+                return response
 
     @jwt_required
     def get(self, user_id):
