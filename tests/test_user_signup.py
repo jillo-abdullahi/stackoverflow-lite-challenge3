@@ -21,7 +21,7 @@ class TestUserCanSignup(unittest.TestCase):
             "username": "HermGranger",
             "email": "hermione.granger@gmail.com",
             "password": "john123456",
-            "confirm-password": "john123456"
+            "confirm": "john123456"
         }
 
     def test_invalid_email(self):
@@ -43,7 +43,7 @@ class TestUserCanSignup(unittest.TestCase):
 
         # Test message
         message = json.loads(response.data)['error']
-        self.assertEqual(message, 'please enter a valid email')
+        self.assertEqual(message, 'Please enter a valid email')
 
     def test_empty_username(self):
         """
@@ -115,7 +115,7 @@ class TestUserCanSignup(unittest.TestCase):
         # Set password to less than 6 characters
         self.new_user_details["password"] = "chek1"
 
-        self.new_user_details["confirm-password"] = "check1"
+        self.new_user_details["confirm"] = "check1"
 
         response = self.app.post(
             '/stackoverflowlite/api/v1/auth/signup',
@@ -128,7 +128,7 @@ class TestUserCanSignup(unittest.TestCase):
 
         # Test message
         message = json.loads(response.data)['error']
-        self.assertEqual(message, 'password must have at least 6 characters')
+        self.assertEqual(message, 'Password should have at least 6 characters')
 
     def test_existing_username(self):
         """
@@ -153,7 +153,7 @@ class TestUserCanSignup(unittest.TestCase):
         # Test message
         message = json.loads(response.data)[
             'error']
-        self.assertEqual(message, 'username has already been taken')
+        self.assertEqual(message, 'Username has already been taken')
 
     def test_user_can_signup(self):
         """
@@ -171,7 +171,7 @@ class TestUserCanSignup(unittest.TestCase):
         # Test message
         message = json.loads(response.data)[
             'message']
-        self.assertEqual(message, 'user registered successfully')
+        self.assertEqual(message, 'You have been registered successfully.')
 
     def tearDown(self):
         """

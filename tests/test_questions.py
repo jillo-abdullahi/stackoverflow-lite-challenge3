@@ -1,5 +1,4 @@
 # Test module for questions"""
-import psycopg2
 import unittest
 import json
 
@@ -23,7 +22,7 @@ class TestQuestions(unittest.TestCase):
             "username": "HermGranger",
             "email": "hermione.granger@gmail.com",
             "password": "john123456",
-            "confirm-password": "john123456"
+            "confirm": "john123456"
         }
 
         self.user_login_details = {
@@ -35,7 +34,7 @@ class TestQuestions(unittest.TestCase):
             "username": "ChoChang",
             "email": "cho.chang@gmail.com",
             "password": "cho123456",
-            "confirm-password": "cho123456"
+            "confirm": "cho123456"
         }
 
         self.non_author_login = {
@@ -80,7 +79,7 @@ class TestQuestions(unittest.TestCase):
         # Test message
         message = json.loads(response.data)[
             'message']
-        self.assertEqual(message, 'question successfully posted')
+        self.assertEqual(message, 'Question successfully posted')
 
     def test_user_can_get_all_questions(self):
         """
@@ -144,13 +143,13 @@ class TestQuestions(unittest.TestCase):
         # Test message
         message = json.loads(response.data)[
             'message']
-        self.assertEqual(message, 'question deleted successfully')
+        self.assertEqual(message, 'Question deleted successfully')
 
     def test_delete_non_existing_question(self):
         """
         Test if a non-existent question can be deleted
         """
-        response = self.app.delete('/stackoverflowlite/api/v1/questions/1',
+        response = self.app.delete('/stackoverflowlite/api/v1/questions/22',
                                    headers={
                                        "Authorization": self.access_token,
                                        "content-type": "application/json"})
@@ -160,7 +159,8 @@ class TestQuestions(unittest.TestCase):
         # Test message
         message = json.loads(response.data)[
             'error']
-        self.assertEqual(message, "question doesn't exist")
+        self.assertEqual(
+            message, "Sorry, question with that id does not exist")
 
     def test_if_non_author_can_delete_question(self):
         """
@@ -233,7 +233,8 @@ class TestQuestions(unittest.TestCase):
         # Test message
         message = json.loads(response.data)[
             'error']
-        self.assertEqual(message, "question already asked")
+        self.assertEqual(
+            message, "That question has already been asked. Please ask another.")
 
     def test_getting_if_no_questions_exist(self):
         """
@@ -250,7 +251,7 @@ class TestQuestions(unittest.TestCase):
         # Test message
         message = json.loads(response.data)[
             'message']
-        self.assertEqual(message, "no questions yet")
+        self.assertEqual(message, "No questions yet")
 
     def test_empty_question_title(self):
         """

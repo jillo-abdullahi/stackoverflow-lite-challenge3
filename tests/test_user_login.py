@@ -23,7 +23,7 @@ class TestUserCanLogin(unittest.TestCase):
             "username": "jillWoche",
             "email": "jayloabdullahi@gmail.com",
             "password": "johndoe95",
-            "confirm-password": "johndoe95"
+            "confirm": "johndoe95"
         }
 
         self.user_login_details = {
@@ -51,8 +51,8 @@ class TestUserCanLogin(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Test message
-        message = json.loads(response.data)['success']
-        self.assertIn('logged in as', message)
+        message = json.loads(response.data)['message']
+        self.assertEqual(message, 'Login successful')
 
     def test_incorrect_email(self):
         """
@@ -70,8 +70,8 @@ class TestUserCanLogin(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
 
         # Test message
-        message = json.loads(response.data)['login failed']
-        self.assertEqual(message, "incorrect username or password")
+        message = json.loads(response.data)['error']
+        self.assertEqual(message, "Incorrect username or password")
 
     def test_incorrect_password(self):
         """Method to test login using incorrect password"""
@@ -85,8 +85,8 @@ class TestUserCanLogin(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
 
         # Test message
-        message = json.loads(response.data)['login failed']
-        self.assertEqual(message, "incorrect username or password")
+        message = json.loads(response.data)['error']
+        self.assertEqual(message, "Incorrect username or password")
 
     def tearDown(self):
         """

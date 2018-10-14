@@ -23,14 +23,14 @@ class TestAnswers(unittest.TestCase):
             "username": "HermGranger",
             "email": "hermione.granger@gmail.com",
             "password": "john123456",
-            "confirm-password": "john123456"
+            "confirm": "john123456"
         }
 
         self.answer_user = {
             "username": "ChoChang",
             "email": "cho.chang@gmail.com",
             "password": "john123456",
-            "confirm-password": "john123456"
+            "confirm": "john123456"
         }
 
         self.answer_user_login = {
@@ -74,26 +74,6 @@ class TestAnswers(unittest.TestCase):
                 "Authorization": self.access_token,
                 "content-type": "application/json"})
 
-    def test_user_cannot_answer_own_question(self):
-        """
-        Method to test if user can add an answer
-        """
-
-        # Try to post an answer
-        response = self.app.post(
-            '/stackoverflowlite/api/v1/questions/1/answers',
-            data=json.dumps(self.answer_details),
-            headers={
-                "Authorization": self.access_token,
-                "content-type": 'application/json'})
-
-        self.assertEqual(response.status_code, 403)
-
-        # Test message
-        message = json.loads(response.get_data(as_text=True))[
-            'message']
-        self.assertIn('you cannot answer your own question', message)
-
     def test_answer_non_existent_question(self):
         """
         Test when answer description has not been provided
@@ -111,7 +91,8 @@ class TestAnswers(unittest.TestCase):
         # Test message
         message = json.loads(response.get_data(as_text=True))[
             'error']
-        self.assertEqual(message, "question doesn't exist")
+        self.assertEqual(
+            message, "Sorry, question with that id does not exist")
 
     def test_answer_description_not_provided(self):
         """
@@ -167,7 +148,7 @@ class TestAnswers(unittest.TestCase):
         # Test message
         message = json.loads(response.get_data(as_text=True))[
             'message']
-        self.assertEqual(message, "answer successfully posted")
+        self.assertEqual(message, "Answer posted successfully")
 
     def tearDown(self):
         """
