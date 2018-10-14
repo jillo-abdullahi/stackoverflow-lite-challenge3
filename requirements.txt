@@ -1,6 +1,7 @@
 aniso8601==3.0.2
 click==6.7
 Flask==1.0.2
+Flask-Cors==3.0.6
 Flask-JWT-Extended==3.12.1
 Flask-RESTful==0.3.6
 gunicorn==19.9.0
