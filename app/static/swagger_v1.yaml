@@ -126,20 +126,20 @@ paths:
           type: string
       responses:
         '200':
-          description: 'Question details returned'
-        '400':
-          description: 'Question with the specified id does not exist'
+          description: 'Question details returned.'
+        '404':
+          description: 'Question with the specified id does not exist.'
         '401':
-          description: 'Authorization token has not been provided or is invalid'
+          description: 'Authorization token has not been provided or is invalid.'
         '422':
-          description: 'Bad authorization header. Should start with Bearer and then the token'
+          description: 'Bad authorization header. Should start with Bearer and then the token.'
       tags:
         - Questions  
   /questions/{question_id}/answers:
     x-summary: Answers
     post:
-      summary: Post an answer on the platform
-      description: User can post an answer to question
+      summary: Post an answer.
+      description: Post an answer to a question that's been asked.
       parameters:
         - name: question_id
           in: path
@@ -152,15 +152,52 @@ paths:
           required: true
           type: string
         - in: body
-          name: answer
-          description: answer to question
+          name: Answer details.
+          description: Description of answer to be posted.
           schema:
             $ref: '#/definitions/PostAnswer'
       responses:
         '201':
           description: 'Answer successfully posted'
-        '400':
+        '404':
           description: 'Question with specified id does not exist'
+        '422':
+          description: 'Bad authorization header. Should start with Bearer and then the token'
+      tags:
+        - Answers
+  /questions/{question_id}/answers/{answer_id}:
+    x-summary: Answers
+    put:
+      summary: Edit an answer.
+      description: Update an answer that's already been posted.
+      parameters:
+        - name: question_id
+          in: path
+          description: Id of question to be answered.
+          required: true
+          type: number
+        - name: answer_id
+          in: path
+          description: Id of answer to be updated.
+          required: true
+          type: number
+        - name: Authorization
+          in: header
+          description: Access token
+          required: true
+          type: string
+        - in: body
+          name: Answer details.
+          description: New description of answer to be posted. User blank {} if accepting answer.
+          schema:
+            $ref: '#/definitions/PostAnswer'
+      responses:
+        '200':
+          description: 'Answer successfully updated.'
+        '404':
+          description: 'Question or answer with specified id does not exist'
+        '403':
+          description: 'You must be the author of the answer to be able to update it or accept it.'
         '422':
           description: 'Bad authorization header. Should start with Bearer and then the token'
       tags:
