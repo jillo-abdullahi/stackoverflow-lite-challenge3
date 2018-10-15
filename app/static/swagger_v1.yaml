@@ -6,7 +6,7 @@ info:
     name: MIT
     url: https://github.com/jillo-abdullahi/stackoverflow-lite-challenge3/blob/master/LICENSE
   description: >-
-    This web application is a platform that enables you to ask programming questions for those times when you get stuck and get answers from other like-minded individuals. You can also post answers from other programmers.
+    This web application is a platform that enables you to ask programming questions for those times when you get stuck and get answers from other like-minded individuals. You can also post answers to questions from other programmers.
 host: 'stackoverflowlite-api.herokuapp.com'
 basePath: /stackoverflowlite/api/v1
 schemes:
