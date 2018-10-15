@@ -84,8 +84,20 @@ class AnswerView(Resource):
         """
         current_user = get_jwt_identity()
         user_id = current_user["user_id"]
+
         answer_author = Answer.get_answer_author(cursor, ans_id)
+        if not answer_author:
+            msg = "Sorry, answer with that id does not exist."
+            response = jsonify({"error": msg})
+            response.status_code = 404
+            return response
+
         question_author = Question.get_question_author(cursor, qn_id)
+        if not question_author:
+            msg = "Sorry, question with that id does not exist."
+            response = jsonify({"error": msg})
+            response.status_code = 404
+            return response
         answer_details = request.get_json()
 
         # Updating answer
@@ -102,8 +114,8 @@ class AnswerView(Resource):
                     answer_details = request.get_json()
 
                     description = answer_details["description"]
-
                     Answer.update_answer(cursor, description, ans_id)
+
                     message = "Answer successfully updated"
                     response = jsonify({"message": message})
                     response.status_code = 200
