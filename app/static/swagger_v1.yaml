@@ -188,7 +188,7 @@ paths:
           type: string
         - in: body
           name: Answer details.
-          description: New description of answer to be posted. User blank {} if accepting answer.
+          description: New description of answer to be posted. Use blank {} if accepting answer.
           schema:
             $ref: '#/definitions/PostAnswer'
       responses:
