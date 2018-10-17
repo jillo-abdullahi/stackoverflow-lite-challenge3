@@ -325,8 +325,10 @@ class Answer(object):
         """
         method to delete answer
         """
-        ans_query = "DELETE FROM answers WHERE question_id=%s;"
+        ans_query = "DELETE FROM answers WHERE id=%s;"
         cursor.execute(ans_query, [ans_id])
+
+        conn.commit()
 
     @staticmethod
     def get_answers_by_user(cursor, user_id):
