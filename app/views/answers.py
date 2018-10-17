@@ -189,3 +189,23 @@ class AnswerDescriptionView(Resource):
         except (Exception, psycopg2.DatabaseError) as error:
             if(conn):
                 return "Failed to get answer description. {}".format(error)
+
+    @jwt_required
+    def delete(self, ans_id):
+        """
+        Delete a specific answer
+        """
+        try:
+            if Answer.delete_answer(cursor, ans_id):
+                msg = "Answer successfully deleted"
+                response = jsonify({"message": msg})
+                response.status_code = 200
+                return response
+            else:
+                message = "Answer with that id does not exist"
+                response = jsonify({"message": message})
+                response.status_code = 404
+                return response
+        except (Exception, psycopg2.DatabaseError) as error:
+            if(conn):
+                return "Failed to delete answer. {}".format(error)
