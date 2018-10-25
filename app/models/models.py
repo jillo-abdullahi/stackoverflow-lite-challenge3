@@ -323,10 +323,20 @@ class Answer(object):
     @staticmethod
     def delete_answer(cursor, ans_id):
         """
-        method to delete answer
+        method to delete a specific answer
         """
         ans_query = "DELETE FROM answers WHERE id=%s;"
         cursor.execute(ans_query, [ans_id])
+
+        conn.commit()
+
+    @staticmethod
+    def delete_all_answers(cursor, qn_id):
+        """
+        method to delete all answers to a specified question
+        """
+        query = "DELETE FROM answers WHERE question_id=%s"
+        cursor.execute(query, [qn_id])
 
         conn.commit()
 

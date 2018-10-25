@@ -141,13 +141,22 @@ class QuestionView(Resource):
         """
 
         current_user = get_jwt_identity()
+
         try:
             question = Question.get_one_question(cursor, qn_id)
 
+        except (Exception, psycopg2.DatabaseError) as error:
+            if(conn):
+                msg = "Sorry, question with that Id does not exist"
+                response = jsonify({"message": msg})
+                response.status_code = 404
+                return response
+
+        try:
             # Check if current user owns question.
             if current_user["user_id"] == question["user_id"]:
                 # Delete answers associated first
-                Answer.delete_answer(cursor, qn_id)
+                Answer.delete_all_answers(cursor, qn_id)
                 Question.delete_question(cursor, qn_id)
                 response = jsonify(
                     {"message": "Question deleted successfully"})
@@ -161,7 +170,5 @@ class QuestionView(Resource):
 
         except (Exception, psycopg2.DatabaseError) as error:
             if(conn):
-                msg = "Sorry, question with that id does not exist"
-                response = jsonify({"error": msg})
-                response.status_code = 404
-                return response
+                if(conn):
+                    return "failed to fetch question by user. {}".format(error)

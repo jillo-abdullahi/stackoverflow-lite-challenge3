@@ -150,6 +150,66 @@ class TestAnswers(unittest.TestCase):
             'message']
         self.assertEqual(message, "Answer posted successfully")
 
+    def test_user_can_delete_answer(self):
+        """
+        Test if user can delete their answer
+        """
+
+        # Try to post an answer to a question
+        response = self.app.post(
+            '/stackoverflowlite/api/v1/questions/1/answers',
+            data=json.dumps(self.answer_details),
+            headers={
+                "Authorization": self.access_token,
+                "content-type": 'application/json'})
+
+        self.assertEqual(response.status_code, 201)
+
+        # Try to delete answer
+        del_response = self.app.delete(
+            '/stackoverflowlite/api/v1/answer/1',
+            headers={
+                "Authorization": self.access_token,
+                "content-type": 'application/json'})
+
+        self.assertEqual(del_response.status_code, 200)
+
+        # Test Message
+        message = json.loads(del_response.get_data(as_text=True))[
+            'message']
+        self.assertEqual(message, "Answer successfully deleted")
+
+        # Attempt to delete question as well
+
+        quest_response = self.app.delete(
+            '/stackoverflowlite/api/v1/questions/1',
+            headers={
+                "Authorization": self.access_token, "content-type": "application/json"})
+        # Test response
+        self.assertEqual(quest_response.status_code, 200)
+
+    def test_delete_question_with_answers(self):
+        """
+        Test if a question with answers can be deleted
+        """
+        # Try to post an answer to a question
+        response = self.app.post(
+            '/stackoverflowlite/api/v1/questions/1/answers',
+            data=json.dumps(self.answer_details),
+            headers={
+                "Authorization": self.access_token,
+                "content-type": 'application/json'})
+
+        self.assertEqual(response.status_code, 201)
+
+        # Try to delete the question
+        quest_response = self.app.delete(
+            '/stackoverflowlite/api/v1/questions/1',
+            headers={
+                "Authorization": self.access_token, "content-type": "application/json"})
+        # Test response
+        self.assertEqual(quest_response.status_code, 200)
+
     def tearDown(self):
         """
         Clear values in db after tests have run

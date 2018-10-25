@@ -158,9 +158,9 @@ class TestQuestions(unittest.TestCase):
 
         # Test message
         message = json.loads(response.data)[
-            'error']
+            'message']
         self.assertEqual(
-            message, "Sorry, question with that id does not exist")
+            message, "Sorry, question with that Id does not exist")
 
     def test_if_non_author_can_delete_question(self):
         """
